@@ -10,10 +10,13 @@ import androidx.core.view.NestedScrollingParentHelper
 import androidx.core.view.ViewCompat
 import androidx.core.view.ViewCompat.TYPE_TOUCH
 
+const val DIVIDER = 1000
+const val FACTOR = 0.4f
 
 class NestedScrollTest @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), NestedScrollingParent3 {
+
 
     private lateinit var topView: View
     private var totalScroll: Int = 0
@@ -59,18 +62,18 @@ class NestedScrollTest @JvmOverloads constructor(
 
     override fun onNestedPreScroll(target: View, dx: Int, dy: Int, consumed: IntArray, type: Int) {
         //滚动之前
-        if (openMode || dy < 0 || target.canScrollVertically(1)) {
+        if (openMode || target.canScrollVertically(1)) {
             totalScroll += dy
         }
-        if (totalScroll in -600..0) {
+        if (totalScroll in -DIVIDER..0) {
             consumed[1] = Math.abs(totalScroll)
         }
         if (openMode && totalScroll > 0) {
             consumed[1] = totalScroll
-            this.translationY = totalScroll * (-1f)
+            this.translationY = totalScroll * (-FACTOR)
         }
-        if (totalScroll <= 0) {
-            topView.setPadding(0, (Math.abs(totalScroll) * 0.35).toInt(), 0, 0)
+        if (totalScroll <= 0 && !openMode) {
+            topView.setPadding(0, (Math.abs(totalScroll) * FACTOR).toInt(), 0, 0)
         }
     }
 
@@ -127,7 +130,7 @@ class NestedScrollTest @JvmOverloads constructor(
 
     override fun onStopNestedScroll(target: View, type: Int) {
         if (openMode) {
-            if (totalScroll > 600) {
+            if (totalScroll > DIVIDER) {
                 childView.visibility = View.GONE
                 openMode = false
             }
@@ -135,7 +138,7 @@ class NestedScrollTest @JvmOverloads constructor(
             totalScroll = 0
         } else {
             if (totalScroll < 0) {
-                if (totalScroll < -600) {
+                if (totalScroll < -DIVIDER) {
                     childView.visibility = View.VISIBLE
                     openMode = true
                 }
